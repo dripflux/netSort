@@ -1,0 +1,32 @@
+#!/usr/bin/env less
+
+# Project: General Project
+# File: .gitignore
+# Description: List of patterns/files to ignore (not include in git repository)
+
+# Temporary files
+**/*~
+**/~$*
+**/*.tmp
+**/tmp/
+
+# Local Host only files (e.g. extremely large files)
+**/localLink/
+
+# Application Cacheing and Environment Configuration
+**/__pycache__/
+**/.vscode/
+
+# Mid-compilation, Byte-code
+**/*.[ao]
+**/*.pyc
+
+# Operating/File System Artifacts
+**/.DS_Store
+**/Thumbs.db*
+**/*:Zone.Identifier
+
+# Archives
+**/*.tar.gz
+**/*.tgz
+**/*.zip
