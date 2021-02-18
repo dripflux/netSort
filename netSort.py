@@ -2,13 +2,35 @@
 
 """
 NAME
-	netSort - Network traffic sorter. Group, sort, and report network traffic for specified metadata.
+	netSort - Network traffic sorter. Group, sort, and report network traffic on specified metadata.
 
 SYNOPSIS
-	netSort ...
+	netSort metadataFile...
+	netSort [group <src | dest | connect | proto>] [count <packets | bytes>] [order <low | high>] metadataFile...
+	netSort help
 
 DESCRIPTION
-	...
+	Process network traffic packet metadata from metadataFile.
+	Default I/O format is CSV discussed in RawPacket (ID, relative time, source address, destination address, protocol, payload bytes).
+	Group packets by 'group' per below.
+	Count packet groups by 'count' per below.
+	Order output based on 'order' per below.
+
+	group
+		src : (default) Group packets by source address
+		dest : Group packets by destination address
+		connect : Group packets by source and destination pairing permutations, a:b is separate from b:a.
+		proto : Group packets by protocol.
+
+	count
+		packets : (default) Count number of packets for group.
+		bytes : Count total bytes sent for group.
+
+	order
+		low : (default) Order output low to high (i.e. normal sorting).
+		high : Order output high to low (i.e. reverse sorting).
+
+	help : Print this help file.
 """
 
 # Required imports
@@ -26,24 +48,31 @@ class RawPacket :
 	Description: Model a single raw packet.
 	"""
 
-	def __init__(self) :
+	def __init__(
+			self
+		) :
 		"""
 		Description: Initialize an empty raw packet.
 		"""
 		self.ID = None
-		self.seconds = 0
+		self.relTime = 0
 		self.srcAddr = None
 		self.destAddr = None
 		self.proto = None
 		self.bytes = 0
 
-	def __str__(self) :
+	def __str__(
+			self
+		) :
 		"""
 		Description: CSV representation of RawPacket.
 		"""
 		return self.toCSV()
 
-	def fromCSV(self, lineCSV="") :
+	def fromCSV(
+			self
+			, lineCSV = ""
+		) :
 		"""
 		Description: Populate RawPacket from CSV representation.
 			Fields (index : description):
@@ -62,7 +91,9 @@ class RawPacket :
 		self.proto = fields[4].strip('"')
 		self.bytes = int( fields[5].strip('"') )
 
-	def toCSV(self) :
+	def toCSV(
+			self
+		) :
 		"""
 		Description: Return CSV representation of RawPacket.
 			Fields (index : description):
@@ -87,17 +118,21 @@ def main(
 	Return:
 		...
 	"""
-	## Set Up Environment
+	# Set Up Environment
 	if cmdArgv is None :
 		argv = sys.argv
 	else :
 		argv = cmdArgv
+	if "help" in argv :
+		print(__doc__)
+		sys.exit()
 	configureDefaults()
 	...
 
 # Function Definitions
 
-def configureDefaults() :
+def configureDefaults(
+	) :
 	"""
 	Description: Assign default configuration to config.
 	"""
