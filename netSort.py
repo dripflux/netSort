@@ -38,7 +38,7 @@ import sys  # System Module: argv
 
 # Declare Required Constants (Immutables)
 # Mode Bits
-# Group By
+# Group By - Value Style
 # 1|111
 GROUP_BY_MASK        = 0o17  # Bits 0-3
 GROUP_BY_USE_DEFAULT = 0o00
@@ -48,7 +48,7 @@ GROUP_BY_CONNECT     = 0o03
 GROUP_BY_PROTO       = 0o04
 GROUP_BY_EXTEND_01   = 0o17
 GROUP_BY_DEFAULT     = GROUP_BY_SRC_ADDR
-# Count
+# Sort - Value Style
 # 11|11 0|000
 SORT_MASK        = 0o360  # Bits 4-7
 SORT_USE_DEFAULT = 0o000
@@ -56,7 +56,7 @@ SORT_PACKETS     = 0o020
 SORT_BYTES       = 0o040
 SORT_EXTEND_01   = 0o360
 SORT_DEFAULT     = SORT_PACKETS
-# Order
+# Order - Value Style
 # 111|1 00|00 0|000
 ORDER_MASK        = 0o7400  # Bits 8-11
 ORDER_USE_DEFAULT = 0o0000
@@ -64,7 +64,7 @@ ORDER_NUM_LOW     = 0o0400
 ORDER_NUM_HIGH    = 0o1000
 ORDER_EXTEND_01   = 0o7400
 ORDER_DEFAULT     = ORDER_NUM_LOW
-# Input Format
+# Input Format - Value Style
 # 1|111| 000|0 00|00 0|000
 IN_FORMAT_MASK          = 0o170000  # Bits 12-15
 IN_FORMAT_USE_DEFAULT   = 0o000000
@@ -72,7 +72,7 @@ IN_FORMAT_CSV_HEADER    = 0o010000
 IN_FORMAT_CSV_NO_HEADER = 0o020000
 IN_FORMAT_EXTEND_01     = 0o170000
 IN_FORMAT_DEFAULT       = IN_FORMAT_CSV_HEADER
-# Output Data
+# Output Data - Flag Style
 # 11|11 0|000| 000|0 00|00 0|000
 OUT_DATA_MASK        = 0o3600000  # Bits 16-19
 OUT_DATA_USE_DEFAULT = 0o0000000
@@ -81,7 +81,7 @@ OUT_DATA_PACKETS     = 0o0400000
 OUT_DATA_BYTES       = 0o1000000
 OUT_DATA_EXTEND_01   = 0o2000000
 OUT_DATA_DEFAULT     = OUT_DATA_TRACK_SORT
-# Output Format
+# Output Format - Value Style
 # 111|1 00|00 0|000| 000|0 00|00 0|000
 OUT_FORMAT_MASK        = 0o74000000  # Bits 20-23
 OUT_FORMAT_USE_DEFAULT = 0o00000000
@@ -545,16 +545,21 @@ def main(
 		...
 	"""
 	# Set Up Environment
+	configureDefaults()
 	if cmdArgv is None :
 		argv = sys.argv
 	else :
 		argv = cmdArgv
-	# Handle help option
-	if "help" in argv :
-		print(__doc__)
-		sys.exit()
-	configureDefaults()
-	...
+	# Prepare for processing
+	inputFilenames = processCommandLine(argv.copy())
+	# Process input data
+	networkMetadata = ProcPackets()
+	for inputFilename in inputFilenames :
+		networkMetadata.appendPackets(inputFilename)
+	# Create ProcPackets
+	results = networkMetadata.processPerMode()
+	# Output Results
+	outputResults(results)
 
 # Function Definitions
 
@@ -571,6 +576,39 @@ def configureDefaults(
 	  | OUT_DATA_USE_DEFAULT \
 	  | OUT_FORMAT_USE_DEFAULT
 
+def processCommandLine(
+		argv
+	) :
+	"""
+	Description:
+	Arguments:
+		argv : Command line arguments, expect same format as sys.argv.
+	Return:
+		[list] : List of input filenames.
+	"""
+	# Handle help option
+	if "help" in argv :
+		print(__doc__)
+		sys.exit()
+	filenames = []
+	skipIt = False
+	for i in range(1, len(argv)) :
+		if skipIt :
+			skipIt = False
+			continue
+		if argv[i] == "group" :    # group sub-command
+			...
+			skipIt = True
+		elif argv[i] == "sort" :   # sort sub-command
+			...
+			skipIt = True
+		elif argv[i] == "order" :  # order sub-command
+			...
+			skipIt = True
+		else :                     # Input filename
+			filenames.append(argv[i])
+	return filenames.copy()
+
 def outputResults(
 		results
 		, file = sys.stdout
@@ -580,16 +618,27 @@ def outputResults(
 	Description: ...
 	"""
 	if mode is not None :
-		outMode = mode & SORT_MASK
+		outDataMode = mode & OUT_DATA_MASK
+		sortMode = mode & SORT_MASK
 	else :
-		outMode = config["mode"] & SORT_MASK
-	if outMode == SORT_USE_DEFAULT :
-		outMode = SORT_DEFAULT
+		outDataMode = config["mode"] & OUT_DATA_MASK
+		sortMode = config["mode"] & SORT_MASK
+	if outDataMode == OUT_DATA_USE_DEFAULT :
+		outDataMode = OUT_DATA_DEFAULT
+	if outDataMode == OUT_DATA_TRACK_SORT :
+		if sortMode == SORT_USE_DEFAULT :
+			sortMode = SORT_DEFAULT
+		if sortMode == SORT_PACKETS :
+			outDataMode = OUT_DATA_PACKETS
+		elif sortMode == SORT_BYTES :
+			outDataMode = OUT_DATA_BYTES
+		elif sortMode == SORT_EXTEND_01 :
+			...
 	for resultProcPacket in results :
 		outData = str(resultProcPacket.group) + "\t"
-		if outMode == SORT_PACKETS :
+		if outDataMode == OUT_DATA_PACKETS :
 			outData += str(resultProcPacket.count)
-		elif outMode == SORT_BYTES :
+		elif outDataMode == OUT_DATA_BYTES :
 			outData += str(resultProcPacket.bytes)
 		print(outData, file=file)
 
