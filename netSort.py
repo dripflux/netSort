@@ -16,17 +16,17 @@ DESCRIPTION
 	Sort packet groups by 'sort' per below.
 	Order output based on 'order' per below.
 
-	group
-		src : (default) Group packets by source address
-		dest : Group packets by destination address
+	group : Group packets per below argument, repeats overwrite previous setting.
+		src : (default) Group packets by source address.
+		dest : Group packets by destination address.
 		connect : Group packets by source and destination pairing permutations, a -> b is separate from b -> a.
 		proto : Group packets by protocol.
 
-	sort
+	sort : Sort packets per below argument, repeats overwrite previous setting.
 		packets : (default) Sort by number of packets for group.
 		bytes : Sort by total bytes sent for group.
 
-	order
+	order : Order packet sorting per below argument, repeats overwrite previous setting.
 		low : (default) Order output numerical low to high (i.e. normal sorting).
 		high : Order output numerical high to low (i.e. reverse sorting).
 
@@ -377,6 +377,10 @@ class ProcPackets :
 		self.__processGroupBy()
 		self.__resultPackets = list(self.__procPackets.values())
 		self.__resultPackets.sort()
+		# Reverse order if needed
+		orderMode = config["mode"] & ORDER_MASK
+		if orderMode == ORDER_NUM_HIGH :
+			self.__resultPackets.reverse()
 		return self.__resultPackets.copy()
 
 	def __processGroupBy(
@@ -406,7 +410,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_BYTES
+		return self.processPerMode(procMode)
 
 	def connectionByPackets(
 			self
@@ -419,7 +428,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_PACKETS
+		return self.processPerMode(procMode)
 
 	def destinationByBytes(
 			self
@@ -432,7 +446,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_BYTES
+		return self.processPerMode(procMode)
 
 	def destinationByPackets(
 			self
@@ -445,7 +464,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_PACKETS
+		return self.processPerMode(procMode)
 
 	def protocolByBytes(
 			self
@@ -458,7 +482,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_PROTO | SORT_BYTES
+		return self.processPerMode(procMode)
 
 	def protocolByPackets(
 			self
@@ -471,7 +500,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_PROTO | SORT_PACKETS
+		return self.processPerMode(procMode)
 
 	def sourceByBytes(
 			self
@@ -484,7 +518,12 @@ class ProcPackets :
 		Returns:
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
-		...
+		if orderMode is not None :
+			procOrderMode = orderMode & ORDER_MASK
+		else :
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_BYTES
+		return self.processPerMode(procMode)
 
 	def sourceByPackets(
 			self
@@ -498,12 +537,10 @@ class ProcPackets :
 			[list] : List of tuples per group, count, and order processed packet data.
 		"""
 		if orderMode is not None :
-			procMode = orderMode & ORDER_MASK
+			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procMode = config["mode"] & ORDER_MASK
-		procMode = procMode & ~GROUP_BY_MASK
-		procMode = procMode & ~SORT_MASK
-		procMode = procMode | GROUP_BY_SRC_ADDR | SORT_PACKETS
+			procOrderMode = config["mode"] & ORDER_MASK
+		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_PACKETS
 		return self.processPerMode(procMode)
 
 	def clear(
@@ -596,16 +633,53 @@ def processCommandLine(
 		if skipIt :
 			skipIt = False
 			continue
-		if argv[i] == "group" :    # group sub-command
-			...
+		if argv[i] == "group" :  # Argument: Sub-command: group
+			if i < len(argv) - 1 :
+				saveCurrMode = config["mode"] & ~ GROUP_BY_MASK
+				groupByStr = argv[i+1]
+				if groupByStr == "src" :
+					newGroupMode = GROUP_BY_SRC_ADDR
+				elif groupByStr == "dest" :
+					newGroupMode = GROUP_BY_DEST_ADDR
+				elif groupByStr == "connect" :
+					newGroupMode = GROUP_BY_CONNECT
+				elif groupByStr == "proto" :
+					newGroupMode = GROUP_BY_PROTO
+				else :
+					sys.exit("(netSort) ERROR: Improper 'group' Usage, see 'help'.")
+				config["mode"] = saveCurrMode | newGroupMode
+			else :
+				sys.exit("(netSort) ERROR: Improper 'group' Usage, see 'help'.")
 			skipIt = True
-		elif argv[i] == "sort" :   # sort sub-command
-			...
+		elif argv[i] == "sort" :  # Argument: Sub-command: sort
+			if i < len(argv) - 1 :
+				saveCurrMode = config["mode"] & ~ SORT_MASK
+				sortStr = argv[i+1]
+				if sortStr == "packets" :
+					newSortMode = SORT_PACKETS
+				elif sortStr == "bytes" :
+					newSortMode = SORT_BYTES
+				else :
+					sys.exit("(netSort) ERROR: Improper 'sort' Usage, see 'help'.")
+				config["mode"] = saveCurrMode | newSortMode
+			else :
+				sys.exit("(netSort) ERROR: Improper 'sort' Usage, see 'help'.")
 			skipIt = True
-		elif argv[i] == "order" :  # order sub-command
-			...
+		elif argv[i] == "order" :  # Argument: Sub-command: order
+			if i < len(argv) - 1 :
+				saveCurrMode = config["mode"] & ~ ORDER_MASK
+				orderStr = argv[i+1]
+				if orderStr == "low" :
+					newOrderMode = ORDER_NUM_LOW
+				elif orderStr == "high" :
+					newOrderMode = ORDER_NUM_HIGH
+				else :
+					sys.exit("(netOrder) ERROR: Improper 'order' Usage, see 'help'.")
+				config["mode"] = saveCurrMode | newOrderMode
+			else :
+				sys.exit("(netOrder) ERROR: Improper 'order' Usage, see 'help'.")
 			skipIt = True
-		else :                     # Input filename
+		else :  # Argument: Input filename
 			filenames.append(argv[i])
 	return filenames.copy()
 
