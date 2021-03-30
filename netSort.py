@@ -70,6 +70,7 @@ IN_FORMAT_MASK          = 0o170000  # Bits 12-15
 IN_FORMAT_USE_DEFAULT   = 0o000000
 IN_FORMAT_CSV_HEADER    = 0o010000
 IN_FORMAT_CSV_NO_HEADER = 0o020000
+IN_FORMAT_FILE_OBJ      = 0o030000
 IN_FORMAT_EXTEND_01     = 0o170000
 IN_FORMAT_DEFAULT       = IN_FORMAT_CSV_HEADER
 # Output Data - Flag Style
@@ -124,7 +125,7 @@ class RawPacket :
 
 	def fromCSV(
 			self
-			, lineCSV = ""
+			, lineCSV
 		) :
 		"""
 		Description: Populate RawPacket from CSV representation.
@@ -135,14 +136,19 @@ class RawPacket :
 			3 : Destination address
 			4 : Protocol, highest identified protocol in network stack
 			5 : Payload size in bytes
+		Arguments:
+			lineCSV : Single line packet fields in CSV format
 		"""
-		fields = lineCSV.split(",")
-		self.ID = fields[0].strip('"')
-		self.relTime = float( fields[1].strip('"') )
-		self.srcAddr = fields[2].strip('"')
+		try :
+			fields = lineCSV.split(",")
+		except :
+			raise
+		self.ID       = fields[0].strip('"')
+		self.relTime  = float( fields[1].strip('"') )
+		self.srcAddr  = fields[2].strip('"')
 		self.destAddr = fields[3].strip('"')
-		self.proto = fields[4].strip('"')
-		self.bytes = int( fields[5].strip('"') )
+		self.proto    = fields[4].strip('"')
+		self.bytes    = int( fields[5].strip('"') )
 
 	def toCSV(
 			self
@@ -157,8 +163,8 @@ class RawPacket :
 			4 : Protocol, highest identified protocol in network stack
 			5 : Payload size in bytes
 		"""
-		packetCSV = str(self.ID) + "," + str(self.relTime) + "," + str(self.srcAddr)\
-		  + "," + str(self.destAddr) + "," + str(self.proto) + "," + str(self.bytes)
+		packetCSV = str(self.ID) + "," + str(self.relTime) + "," + str(self.srcAddr) \
+		            + "," + str(self.destAddr) + "," + str(self.proto) + "," + str(self.bytes)
 		return packetCSV
 
 class ProcPacket :
@@ -206,6 +212,9 @@ class ProcPacket :
 			self
 			, other
 		) :
+		"""
+		Description: Return equality Boolean based on Sort Mode.
+		"""
 		modeSort = config["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
@@ -218,6 +227,9 @@ class ProcPacket :
 			self
 			, other
 		) :
+		"""
+		Description: Return greater than or equality Boolean based on Sort Mode.
+		"""
 		modeSort = config["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
@@ -240,6 +252,9 @@ class ProcPacket :
 			self
 			, other
 		) :
+		"""
+		Description: Return greater than Boolean based on Sort Mode.
+		"""
 		modeSort = config["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
@@ -262,6 +277,9 @@ class ProcPacket :
 			self
 			, other
 		) :
+		"""
+		Description: Return less than or equality Boolean based on Sort Mode.
+		"""
 		modeSort = config["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
@@ -284,6 +302,9 @@ class ProcPacket :
 			self
 			, other
 		) :
+		"""
+		Description: Return less than Boolean based on Sort Mode.
+		"""
 		modeSort = config["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
@@ -305,12 +326,15 @@ class ProcPacket :
 	def __str__(
 			self
 		) :
+		"""
+		Description: CSV representation of ProcPacket.
+		"""
 		strPacket = str(self.group) + "," + str(self.count) + "," + str(self.bytes)
 		return strPacket
 
 class ProcPackets :
 	"""
-	Description: Container for ProcPacket singletons.
+	Description: Container for ProcPacket objects.
 	"""
 
 	def __init__(
@@ -321,6 +345,9 @@ class ProcPackets :
 		"""
 		Description: Initialize an empty packet container, or with specified data from file per format.
 		Design philosophy, container attributes should be internally managed, not directly manipulated by external code.
+		Arguments:
+			file : Name of input file, or file object of raw packets
+			format : Format of file
 		"""
 		self.__rawPackets = []
 		self.__procPackets = {}
@@ -330,35 +357,40 @@ class ProcPackets :
 
 	def appendPackets(
 			self
-			, file = None
+			, file
 			, format = IN_FORMAT_USE_DEFAULT
 		) :
-		if file is not None :
-			# Prepare for opening input file
-			formatIn = format & IN_FORMAT_MASK
-			if formatIn == IN_FORMAT_USE_DEFAULT :
-				formatIn = IN_FORMAT_DEFAULT
-			fileOpenMode = "rt"
-			try :
-				packetsFile = open(file, mode=fileOpenMode)
-			except :
-				raise
-			# Convert input file to packet per line format
-			packetPerLine = []
-			if (formatIn & IN_FORMAT_CSV_HEADER) or (formatIn & IN_FORMAT_CSV_NOHEADER) :
-				packetPerLine = packetsFile
-			skipFirst = False
-			if formatIn & IN_FORMAT_CSV_HEADER :
-				skipFirst = True
-			# Process packet per line
-			for packetLine in packetPerLine :
-				if skipFirst :
-					skipFirst = False
-					continue
-				pureCSV = packetLine.strip()
-				newPacket = RawPacket()
-				newPacket.fromCSV(pureCSV)
-				self.__rawPackets.append(newPacket)
+		"""
+		Description: Append raw packets from file per format to current raw packets container.
+		Arguments:
+			file : Name of input file, or file object of raw packets
+			format : Format of file
+		"""
+		# Prepare for opening input file
+		formatIn = format & IN_FORMAT_MASK
+		if formatIn == IN_FORMAT_USE_DEFAULT :
+			formatIn = IN_FORMAT_DEFAULT
+		fileOpenMode = "rt"
+		try :
+			packetsFile = open(file, mode=fileOpenMode)
+		except :
+			raise
+		# Convert input file to packet per line format
+		packetPerLine = []
+		if (formatIn & IN_FORMAT_CSV_HEADER) or (formatIn & IN_FORMAT_CSV_NO_HEADER) :
+			packetPerLine = packetsFile
+		skipFirst = False
+		if formatIn & IN_FORMAT_CSV_HEADER :
+			skipFirst = True
+		# Process packet per line
+		for packetLine in packetPerLine :
+			if skipFirst :
+				skipFirst = False
+				continue
+			pureCSV = packetLine.strip()
+			newPacket = RawPacket()
+			newPacket.fromCSV(pureCSV)
+			self.__rawPackets.append(newPacket)
 
 	def processPerMode(
 			self
