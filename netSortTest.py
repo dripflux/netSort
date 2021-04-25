@@ -42,7 +42,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'ID' attribute exists in RawPacket.
+		Description: Test that 'ID' exists in RawPacket.
 		"""
 		self.assertIn("ID", dir(self.emptyPacket))
 
@@ -50,7 +50,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'relTime' attribute exists in RawPacket.
+		Description: Test that 'relTime' exists in RawPacket.
 		"""
 		self.assertIn("relTime", dir(self.emptyPacket))
 
@@ -58,7 +58,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'srcAddr' attribute exists in RawPacket.
+		Description: Test that 'srcAddr' exists in RawPacket.
 		"""
 		self.assertIn("srcAddr", dir(self.emptyPacket))
 
@@ -66,7 +66,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'destAddr' attribute exists in RawPacket.
+		Description: Test that 'destAddr' exists in RawPacket.
 		"""
 		self.assertIn("destAddr", dir(self.emptyPacket))
 
@@ -74,7 +74,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'proto' attribute exists in RawPacket.
+		Description: Test that 'proto' exists in RawPacket.
 		"""
 		self.assertIn("proto", dir(self.emptyPacket))
 
@@ -82,7 +82,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'bytes' attribute exists in RawPacket.
+		Description: Test that 'bytes' exists in RawPacket.
 		"""
 		self.assertIn("bytes", dir(self.emptyPacket))
 
@@ -90,7 +90,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'fromCSV' attribute exists in RawPacket.
+		Description: Test that 'fromCSV' exists in RawPacket.
 		"""
 		self.assertIn("fromCSV", dir(self.emptyPacket))
 
@@ -98,7 +98,7 @@ class RawPacketExistTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'toCSV' attribute exists in RawPacket.
+		Description: Test that 'toCSV' exists in RawPacket.
 		"""
 		self.assertIn("toCSV", dir(self.emptyPacket))
 
@@ -121,7 +121,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'ID' attribute is None for new RawPacket instance.
+		Description: Test that 'ID' is None for new RawPacket instance.
 		"""
 		self.assertIsNone(self.emptyPacket.ID)
 
@@ -129,7 +129,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'relTime' attribute equals 0 for new RawPacket instance.
+		Description: Test that 'relTime' equals 0 for new RawPacket instance.
 		"""
 		self.assertEqual(self.emptyPacket.relTime, 0)
 
@@ -137,7 +137,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'srcAddr' attribute is None for new RawPacket instance.
+		Description: Test that 'srcAddr' is None for new RawPacket instance.
 		"""
 		self.assertIsNone(self.emptyPacket.srcAddr)
 
@@ -145,7 +145,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'destAddr' attribute is None for new RawPacket instance.
+		Description: Test that 'destAddr' is None for new RawPacket instance.
 		"""
 		self.assertIsNone(self.emptyPacket.destAddr)
 
@@ -153,7 +153,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'proto' attribute is None for new RawPacket instance.
+		Description: Test that 'proto' is None for new RawPacket instance.
 		"""
 		self.assertIsNone(self.emptyPacket.proto)
 
@@ -161,7 +161,7 @@ class RawPacketEmptyTestCase(
 			self
 		) :
 		"""
-		Description: Test that 'bytes' attribute equals 0 for new RawPacket instance.
+		Description: Test that 'bytes' equals 0 for new RawPacket instance.
 		"""
 		self.assertEqual(self.emptyPacket.bytes, 0)
 

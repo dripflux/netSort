@@ -11,7 +11,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Process network traffic packet metadata from metadataFile.
-	Default I/O format is CSV discussed in RawPacket (ID, relative time, source address, destination address, protocol, payload bytes).
+	Default I/O format is CSV discussed in RawPacket (ID, relative time, source address, destination address, protocol, packet bytes).
 	Group packets by 'group' per below.
 	Sort packet groups by 'sort' per below.
 	Order output based on 'order' per below.
@@ -135,7 +135,7 @@ class RawPacket :
 			2 : Source address
 			3 : Destination address
 			4 : Protocol, highest identified protocol in network stack
-			5 : Payload size in bytes
+			5 : Packet size in bytes
 		Arguments:
 			lineCSV : Single line packet fields in CSV format
 		"""
@@ -161,7 +161,7 @@ class RawPacket :
 			2 : Source address
 			3 : Destination address
 			4 : Protocol, highest identified protocol in network stack
-			5 : Payload size in bytes
+			5 : Packet size in bytes
 		"""
 		packetCSV = str(self.ID) + "," + str(self.relTime) + "," + str(self.srcAddr) \
 		            + "," + str(self.destAddr) + "," + str(self.proto) + "," + str(self.bytes)
@@ -169,7 +169,7 @@ class RawPacket :
 
 class ProcPacket :
 	"""
-	Description: Singleton for processed packets based on grouping, counting, and ordering mode processed from a RawPacket.
+	Description: Data object for processed packets based on grouping, counting, and ordering mode processed from a RawPacket.
 	"""
 
 	def __init__(
