@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 """
 NAME
 	netSort - Network traffic sorter. Group, sort, and report network traffic on specified metadata.
@@ -33,8 +34,11 @@ DESCRIPTION
 	help : Print this help file.
 """
 
+
 # Required imports
-import sys  # System Module: argv
+import enum  # Enumeration Module: Enum()
+import sys   # System Module: argv
+
 
 # Declare Required Constants (Immutables)
 # Mode Bits
@@ -92,10 +96,29 @@ OUT_FORMAT_CSV         = 0o14000000
 OUT_FORMAT_EXTEND_01   = 0o74000000
 OUT_FORMAT_DEFAULT     = OUT_FORMAT_TSV_HUMAN
 
+
 # Declare Required Variables (Mutables)
 config = {}
 
+
 # Class Definitions
+
+
+class SPLTcsv(enum.Enum) :
+	"""
+	Description: Field enumeration of Sequence of Packet Length and Timing CSV, 0 basis indexing.
+	"""
+
+	frame    = 0  # Frame number of packet
+	relTime  = 1  # Arrival time of packet, relative to start of capture file
+	srcAddr  = 2  # Source address of packet, highest layer address between Data Link and Network layers
+	destAddr = 3  # Destination address of packet, highest layer address between Data Link and Network layers
+	srcPort  = 4  # Source port of packet, Transport layer
+	destPort = 5  # Destination port of packet, Transport layer
+	protocol = 6  # Protocol of packet, highest layer protocol between Data Link and Application layers
+	length   = 7  # Length of packet in bytes, excludes Data Link layer frame synchronization header and footer bytes
+	info     = 8  # Summary information of packet
+
 
 class RawPacket :
 	"""
@@ -128,14 +151,7 @@ class RawPacket :
 			, lineCSV
 		) :
 		"""
-		Description: Populate RawPacket from CSV representation.
-			Fields (index : description):
-			0 : ID
-			1 : Relative time from beginning of source capture
-			2 : Source address
-			3 : Destination address
-			4 : Protocol, highest identified protocol in network stack
-			5 : Packet size in bytes
+		Description: Populate RawPacket from CSV representation, CSV field indexing per SPLTcsv enumeration.
 		Arguments:
 			lineCSV : Single line packet fields in CSV format
 		"""
@@ -143,12 +159,15 @@ class RawPacket :
 			fields = lineCSV.split(",")
 		except :
 			raise
-		self.ID       = fields[0].strip('"')
-		self.relTime  = float( fields[1].strip('"') )
-		self.srcAddr  = fields[2].strip('"')
-		self.destAddr = fields[3].strip('"')
-		self.proto    = fields[4].strip('"')
-		self.bytes    = int( fields[5].strip('"') )
+		self.ID       = fields[SPLTcsv.frame.value].strip('"')
+		self.relTime  = float( fields[SPLTcsv.relTime.value].strip('"') )
+		self.srcAddr  = fields[SPLTcsv.srcAddr.value].strip('"')
+		self.destAddr = fields[SPLTcsv.destAddr.value].strip('"')
+		self.srcPort  = fields[SPLTcsv.srcPort.value].strip('"')
+		self.destPort = fields[SPLTcsv.destPort.value].strip('"')
+		self.proto    = fields[SPLTcsv.protocol.value].strip('"')
+		self.bytes    = int( fields[SPLTcsv.length.value].strip('"') )
+		self.info     = fields[SPLTcsv.info.value].strip('"')
 
 	def toCSV(
 			self
@@ -160,11 +179,17 @@ class RawPacket :
 			1 : Relative time from beginning of source capture
 			2 : Source address
 			3 : Destination address
-			4 : Protocol, highest identified protocol in network stack
-			5 : Packet size in bytes
+			4 : Source port
+			5 : Destination port
+			6 : Protocol, highest identified protocol in network stack
+			7 : Packet size in bytes
+			8 : Information
 		"""
-		packetCSV = str(self.ID) + "," + str(self.relTime) + "," + str(self.srcAddr) \
-		            + "," + str(self.destAddr) + "," + str(self.proto) + "," + str(self.bytes)
+		packetCSV = str(self.ID) + "," + str(self.relTime) \
+		            + "," + str(self.srcAddr) + "," + str(self.destAddr) \
+		            + "," + str(self.srcPort) + "," + str(self.destPort) \
+		            + "," + str(self.proto) + "," + str(self.bytes) \
+		            + "," + str(self.info)
 		return packetCSV
 
 class ProcPacket :
