@@ -125,6 +125,7 @@ class RawPacket :
 	Description: Model a single raw packet.
 	"""
 
+
 	def __init__(
 			self
 		) :
@@ -138,6 +139,7 @@ class RawPacket :
 		self.proto = None
 		self.bytes = 0
 
+
 	def __str__(
 			self
 		) :
@@ -145,6 +147,7 @@ class RawPacket :
 		Description: CSV representation of RawPacket.
 		"""
 		return self.toCSV()
+
 
 	def fromCSV(
 			self
@@ -169,6 +172,7 @@ class RawPacket :
 		self.bytes    = int( fields[SPLTcsv.length.value].strip('"') )
 		self.info     = fields[SPLTcsv.info.value].strip('"')
 
+
 	def toCSV(
 			self
 		) :
@@ -192,10 +196,12 @@ class RawPacket :
 		            + "," + str(self.info)
 		return packetCSV
 
+
 class ProcPacket :
 	"""
 	Description: Data object for processed packets based on grouping, counting, and ordering mode processed from a RawPacket.
 	"""
+
 
 	def __init__(
 			self
@@ -224,6 +230,7 @@ class ProcPacket :
 			self.count = 1
 			self.bytes = packet.bytes
 
+
 	def __iadd__(
 			self
 			, other
@@ -232,6 +239,7 @@ class ProcPacket :
 			self.count += other.count
 			self.bytes += other.bytes
 		return self
+
 
 	def __eq__(
 			self
@@ -247,6 +255,7 @@ class ProcPacket :
 			return (self.count == other.count) and (self.group == other.group)
 		elif modeSort == SORT_BYTES :
 			return (self.bytes == other.bytes) and (self.group == other.group)
+
 
 	def __ge__(
 			self
@@ -273,6 +282,7 @@ class ProcPacket :
 			else :
 				return False
 
+
 	def __gt__(
 			self
 			, other
@@ -297,6 +307,7 @@ class ProcPacket :
 				return self.group > other.group
 			else :
 				return False
+
 
 	def __le__(
 			self
@@ -323,6 +334,7 @@ class ProcPacket :
 			else :
 				return False
 
+
 	def __lt__(
 			self
 			, other
@@ -348,6 +360,7 @@ class ProcPacket :
 			else :
 				return False
 
+
 	def __str__(
 			self
 		) :
@@ -357,10 +370,12 @@ class ProcPacket :
 		strPacket = str(self.group) + "," + str(self.count) + "," + str(self.bytes)
 		return strPacket
 
+
 class ProcPackets :
 	"""
 	Description: Container for ProcPacket objects.
 	"""
+
 
 	def __init__(
 			self
@@ -379,6 +394,7 @@ class ProcPackets :
 		self.__resultPackets = []
 		if file is not None :
 			self.appendPackets(file, format)
+
 
 	def appendPackets(
 			self
@@ -417,6 +433,7 @@ class ProcPackets :
 			newPacket.fromCSV(pureCSV)
 			self.__rawPackets.append(newPacket)
 
+
 	def processPerMode(
 			self
 			, mode = None
@@ -440,6 +457,7 @@ class ProcPackets :
 			self.__resultPackets.reverse()
 		return self.__resultPackets.copy()
 
+
 	def __processGroupBy(
 			self
 		) :
@@ -455,6 +473,7 @@ class ProcPackets :
 				self.__procPackets[procPacket.group] = procPacket
 			else :
 				self.__procPackets[procPacket.group] += procPacket
+
 
 	def connectionByBytes(
 			self
@@ -474,6 +493,7 @@ class ProcPackets :
 		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_BYTES
 		return self.processPerMode(procMode)
 
+
 	def connectionByPackets(
 			self
 			, orderMode = None
@@ -491,6 +511,7 @@ class ProcPackets :
 			procOrderMode = config["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_PACKETS
 		return self.processPerMode(procMode)
+
 
 	def destinationByBytes(
 			self
@@ -510,6 +531,7 @@ class ProcPackets :
 		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_BYTES
 		return self.processPerMode(procMode)
 
+
 	def destinationByPackets(
 			self
 			, orderMode = None
@@ -527,6 +549,7 @@ class ProcPackets :
 			procOrderMode = config["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_PACKETS
 		return self.processPerMode(procMode)
+
 
 	def protocolByBytes(
 			self
@@ -546,6 +569,7 @@ class ProcPackets :
 		procMode = procOrderMode | GROUP_BY_PROTO | SORT_BYTES
 		return self.processPerMode(procMode)
 
+
 	def protocolByPackets(
 			self
 			, orderMode = None
@@ -563,6 +587,7 @@ class ProcPackets :
 			procOrderMode = config["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_PROTO | SORT_PACKETS
 		return self.processPerMode(procMode)
+
 
 	def sourceByBytes(
 			self
@@ -582,6 +607,7 @@ class ProcPackets :
 		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_BYTES
 		return self.processPerMode(procMode)
 
+
 	def sourceByPackets(
 			self
 			, orderMode = None
@@ -600,6 +626,7 @@ class ProcPackets :
 		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_PACKETS
 		return self.processPerMode(procMode)
 
+
 	def clear(
 			self
 		) :
@@ -609,6 +636,7 @@ class ProcPackets :
 		self.clearResults()
 		self.__rawPackets.clear()
 
+
 	def clearResults(
 			self
 		) :
@@ -617,6 +645,7 @@ class ProcPackets :
 		"""
 		self.__procPackets.clear()
 		self.__resultPackets.clear()
+
 
 	def recallResults(
 			self
@@ -628,11 +657,12 @@ class ProcPackets :
 		"""
 		return self.__resultPackets.copy()
 
+
 def main(
 		cmdArgv = None
 	) :
 	"""
-	Description: Main program control flow and logic.
+	Description: Main program control flow.
 	Arguments:
 		cmdArgv : Command line arguments, expect same format as sys.argv.
 	Return:
@@ -655,7 +685,6 @@ def main(
 	# Output Results
 	outputResults(results)
 
-# Function Definitions
 
 def configureDefaults(
 	) :
@@ -669,6 +698,7 @@ def configureDefaults(
 	  | IN_FORMAT_USE_DEFAULT \
 	  | OUT_DATA_USE_DEFAULT \
 	  | OUT_FORMAT_USE_DEFAULT
+
 
 def processCommandLine(
 		argv
@@ -740,6 +770,7 @@ def processCommandLine(
 			filenames.append(argv[i])
 	return filenames.copy()
 
+
 def outputResults(
 		results
 		, file = sys.stdout
@@ -772,6 +803,7 @@ def outputResults(
 		elif outDataMode == OUT_DATA_BYTES :
 			outData += str(resultProcPacket.bytes)
 		print(outData, file=file)
+
 
 configureDefaults()
 if __name__ == "__main__" :  # Called as standalone program
