@@ -17,6 +17,8 @@ DESCRIPTION
 	Sort packet groups by 'sort' per below.
 	Order output based on 'order' per below.
 
+	help : Print this help file.
+
 	group : Group packets per below argument, repeats overwrite previous setting.
 		src : (default) Group packets by source address.
 		dest : Group packets by destination address.
@@ -31,7 +33,11 @@ DESCRIPTION
 		low : (default) Order output numerical low to high (i.e. normal sorting).
 		high : Order output numerical high to low (i.e. reverse sorting).
 
-	help : Print this help file.
+	from : (reserved for future use)
+
+	to : (reserved for future use)
+
+	as : (reserved for future use)
 """
 
 
@@ -686,6 +692,20 @@ def main(
 	outputResults(results)
 
 
+def usage(
+	) :
+	"""
+	Description: Display usage statement and exit.
+	Arguments:
+		(none)
+	Returns:
+		None
+	"""
+	# Core actions
+	print(__doc__)
+	sys.exit()
+
+
 def configureDefaults(
 	) :
 	"""
@@ -710,16 +730,24 @@ def processCommandLine(
 	Return:
 		[list] : List of input filenames.
 	"""
+	# Set up working set
+	parserState = {}
+	parserState['command'] = None
 	# Handle help option
-	if "help" in argv :
-		print(__doc__)
-		sys.exit()
+	# if "help" in argv :
+	# 	print(__doc__)
+	# 	sys.exit()
 	filenames = []
 	skipIt = False
 	for i in range(1, len(argv)) :
 		if skipIt :
 			skipIt = False
+			parserState['command'] = None
 			continue
+		if knownCommand(argv[i]) :
+			processCommand(parserState, argv[i])
+		else :
+			processCommand(parserState, None, argv[i])
 		if argv[i] == "group" :  # Argument: Sub-command: group
 			if i < len(argv) - 1 :
 				saveCurrMode = config["mode"] & ~ GROUP_BY_MASK
@@ -769,6 +797,84 @@ def processCommandLine(
 		else :  # Argument: Input filename
 			filenames.append(argv[i])
 	return filenames.copy()
+
+
+def knownCommand(
+		term
+	) :
+	"""
+	Description: Return True if term is known command, otherwise False.
+	Arguments:
+		term : Term to test
+	Returns:
+		True  : term is a known command
+		False : Otherwise
+	"""
+	# Set up working set
+	knownCommands = {
+	    "help"
+	#   , "as"
+	#   , "from"
+	  , "group"
+	  , "order"
+	  , "sort"
+	#   , "to"
+	}
+	# Core actions
+	return term in knownCommands
+
+
+def processCommand(
+		parserState
+		, command
+		, argument = None
+	) :
+	"""
+	Description: Process command.
+	Arguments:
+		parserState : State of parser
+		command : Command to process
+		argument : Argument to command
+	"""
+	# Set up working set
+	commandTriggersOnArg = {
+	    # "as"
+	#   , "from"
+	    "group"
+	  , "order"
+	  , "sort"
+	#   , "to"
+	}
+	# Core actions
+	if parserState['command'] :  # Already processing a command, treat as argument
+		actOnCommand(parserState, parserState['command'], argument)
+	else :
+		if command in commandTriggersOnArg :
+			parserState['command'] = command
+		else :
+			actOnCommand(parserState, command)
+
+
+def actOnCommand(
+		parserState
+		, command
+		, argument = None
+	) :
+	"""
+	Description: Perform action based on command.
+	Arguments:
+		parserState : State of parser
+		command : Command to act on
+		argument : Argument to command
+	"""
+	# Set up working set
+	...
+	# Core actions
+	parserState['command'] = None  # Default: consume command
+	if command == "help" :
+		usage()
+	else :
+		...
 
 
 def outputResults(
