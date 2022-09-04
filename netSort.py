@@ -7,7 +7,7 @@ NAME
 
 SYNOPSIS
 	netSort metadataFile...
-	netSort [group <src | dest | connect | proto>] [sort <packets | bytes>] [order <low | high>] metadataFile...
+	netSort [group <src | dest | connect | conversation | proto>] [sort <packets | bytes>] [order <low | high | sequence>] metadataFile...
 	netSort help
 
 DESCRIPTION
@@ -23,6 +23,7 @@ DESCRIPTION
 		src : (default) Group packets by source address.
 		dest : Group packets by destination address.
 		connect : Group packets by source and destination pairing permutations, a -> b is separate from b -> a.
+		conversation : Group packets source and destination socket (src.addr, src.port, dest.addr, dest.port) permutations
 		proto : Group packets by protocol.
 
 	sort : Sort packets per below argument, repeats overwrite previous setting.
@@ -32,6 +33,7 @@ DESCRIPTION
 	order : Order packet sorting per below argument, repeats overwrite previous setting.
 		low : (default) Order output numerical low to high (i.e. normal sorting).
 		high : Order output numerical high to low (i.e. reverse sorting).
+		sequence : Sort by conversation start sequence, only available for "group conversation".
 
 	from : (reserved for future use)
 
@@ -138,12 +140,14 @@ class RawPacket :
 		"""
 		Description: Initialize an empty raw packet.
 		"""
-		self.ID = None
-		self.relTime = 0
-		self.srcAddr = None
+		self.ID       = None
+		self.relTime  = 0
+		self.srcAddr  = None
 		self.destAddr = None
-		self.proto = None
-		self.bytes = 0
+		self.srcPort  = None
+		self.destPort = None
+		self.proto    = None
+		self.bytes    = 0
 
 
 	def __str__(
