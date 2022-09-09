@@ -110,12 +110,23 @@ OUT_FORMAT_DEFAULT     = OUT_FORMAT_TSV_HUMAN
 config = {}
 
 
-# Class Definitions
+# Enumerations
+
+class Subcommand(enum.Enum) :
+	"""
+	Enumeration of subcommands.
+	"""
+	UNKNOWN = "unknown"
+	GROUP   = "group"
+	HELP    = "help"
+	ORDER   = "order"
+	SORT    = "sort"
+	# Aliases
 
 
 class SPLTcsv(enum.Enum) :
 	"""
-	Description: Field enumeration of Sequence of Packet Length and Timing CSV, 0 basis indexing.
+	Enumeration of Sequence of Packet Length and Timing CSV field indexes, 0 basis indexing.
 	"""
 
 	frame    = 0  # Frame number of packet
@@ -128,6 +139,8 @@ class SPLTcsv(enum.Enum) :
 	length   = 7  # Length of packet in bytes, excludes Data Link layer frame synchronization header and footer bytes
 	info     = 8  # Summary information of packet
 
+
+# Class Definitions
 
 class RawPacket :
 	"""
@@ -670,23 +683,22 @@ class ProcPackets :
 
 
 def main(
-		cmdArgv = None
+		argv = None
 	) :
 	"""
-	Description: Main program control flow.
-	Arguments:
-		cmdArgv : Command line arguments, expect same format as sys.argv.
-	Return:
-		...
+	Main program control flow.
+
+	:param argv: Argument vector, same format as sys.argv.
+	:type argv: list[str]
+
+	:return: None
+	:rtype: none
 	"""
 	# Set Up Environment
 	configureDefaults()
-	if cmdArgv is None :
-		argv = sys.argv
-	else :
-		argv = cmdArgv
+	cmdArgv = useArgv(argv)
 	# Prepare for processing
-	inputFilenames = processCommandLine(argv.copy())
+	inputFilenames = processArgv(cmdArgv.copy())
 	# Process input data
 	networkMetadata = ProcPackets()
 	for inputFilename in inputFilenames :
@@ -700,11 +712,10 @@ def main(
 def usage(
 	) :
 	"""
-	Description: Display usage statement and exit.
-	Arguments:
-		(none)
-	Returns:
-		None
+	Display usage statement and exit.
+
+	:return: None
+	:rtype: none
 	"""
 	# Core actions
 	print(__doc__)
@@ -724,7 +735,24 @@ def configureDefaults(
 	  | OUT_FORMAT_USE_DEFAULT
 
 
-def processCommandLine(
+def useArgv(
+		argv
+	) :
+	"""
+	Derive and return argv to use (passed in argv or sys.argv) based on argv.
+
+	:param argv: Argument vector to use for derivation.
+	:type argv: list[str] or none
+
+	:return: Derived argument vector.
+	:rtype: list[str]
+	"""
+	# Core actions
+	returnArgv = argv if argv is not None else sys.argv
+	return returnArgv
+
+
+def processArgv(
 		argv
 	) :
 	"""
@@ -743,16 +771,16 @@ def processCommandLine(
 	# 	sys.exit()
 	filenames = []
 	skipIt = False
-	for i in range(1, len(argv)) :
+	for token in argv[1:] :
 		if skipIt :
 			skipIt = False
 			parserState['command'] = None
 			continue
-		if knownCommand(argv[i]) :
-			processCommand(parserState, argv[i])
+		if knownSubcommand(token) :
+			processCommand(parserState, token)
 		else :
-			processCommand(parserState, None, argv[i])
-		if argv[i] == "group" :  # Argument: Sub-command: group
+			processCommand(parserState, None, token)
+		if token == "group" :  # Argument: Subcommand: group
 			if i < len(argv) - 1 :
 				saveCurrMode = config["mode"] & ~ GROUP_BY_MASK
 				groupByStr = argv[i+1]
@@ -770,7 +798,7 @@ def processCommandLine(
 			else :
 				sys.exit("(netSort) ERROR: Improper 'group' Usage, see 'help'.")
 			skipIt = True
-		elif argv[i] == "sort" :  # Argument: Sub-command: sort
+		elif token == "sort" :  # Argument: Subcommand: sort
 			if i < len(argv) - 1 :
 				saveCurrMode = config["mode"] & ~ SORT_MASK
 				sortStr = argv[i+1]
@@ -784,7 +812,7 @@ def processCommandLine(
 			else :
 				sys.exit("(netSort) ERROR: Improper 'sort' Usage, see 'help'.")
 			skipIt = True
-		elif argv[i] == "order" :  # Argument: Sub-command: order
+		elif token == "order" :  # Argument: Sub-command: order
 			if i < len(argv) - 1 :
 				saveCurrMode = config["mode"] & ~ ORDER_MASK
 				orderStr = argv[i+1]
@@ -803,29 +831,54 @@ def processCommandLine(
 	return filenames.copy()
 
 
-def knownCommand(
+def knownSubcommand(
 		term
 	) :
 	"""
-	Description: Return True if term is known command, otherwise False.
-	Arguments:
-		term : Term to test
-	Returns:
-		True  : term is a known command
-		False : Otherwise
+	Determine if term is a known subcommand or not.
+
+	:param term: Value to test.
+	:type term: any
+
+	:return: True if term is a known subcommand, otherwise False.
+	:rtype: bool
 	"""
 	# Set up working set
-	knownCommands = {
-	    "help"
-	#   , "as"
-	#   , "from"
-	  , "group"
-	  , "order"
-	  , "sort"
-	#   , "to"
-	}
+	...
 	# Core actions
-	return term in knownCommands
+	derivedSubcommand = deriveSubcommand(term)
+	isSubcommand = True if derivedSubcommand is not Subcommand.UNKNOWN else False
+	return isSubcommand
+
+
+def deriveSubcommand(
+		hint
+	) :
+	"""
+	Derive subcommand from hint.
+
+	:param hint: ...
+	:type hint: str of
+
+	:return: Derived subcommand.
+	:rtype: Subcommand
+	"""
+	# Set up working set
+	helpSubcommandHints  = {"help" , "HELP" , Subcommand.HELP }
+	groupSubcommandHints = {"group", "GROUP", Subcommand.GROUP}
+	orderSubcommandHints = {"order", "ORDER", Subcommand.ORDER}
+	sortSubcommandHints  = {"sort" , "SORT" , Subcommand.SORT }
+	derivedSubcommand = Subcommand.UNKNOWN
+	# Core actions
+	if   hint in helpSubcommandHints  :
+		derivedSubcommand = Subcommand.HELP
+	elif hint in groupSubcommandHints :
+		derivedSubcommand = Subcommand.GROUP
+	elif hint in orderSubcommandHints :
+		derivedSubcommand = Subcommand.ORDER
+	elif hint in sortSubcommandHints  :
+		derivedSubcommand = Subcommand.SORT
+	return derivedSubcommand
 
 
 def processCommand(
