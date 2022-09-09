@@ -3,12 +3,13 @@
 
 """
 NAME
-	netSort - Network traffic sorter. Group, sort, and report network traffic on specified metadata.
+	netSort.py  Network traffic sorter. Group, sort, and report network traffic on specified metadata.
 
 SYNOPSIS
-	netSort metadataFile...
-	netSort [group <src | dest | connect | conversation | proto>] [sort <packets | bytes>] [order <low | high | sequence>] metadataFile...
-	netSort help
+	netSort.py help
+
+	netSort.py metadataFile...
+	netSort.py [group <src | dest | connect | conversation | proto>] [sort <packets | bytes>] [order <low | high | sequence>] metadataFile...
 
 DESCRIPTION
 	Process network traffic packet metadata from metadataFile.
@@ -17,7 +18,7 @@ DESCRIPTION
 	Sort packet groups by 'sort' per below.
 	Order output based on 'order' per below.
 
-	help : Print this help file.
+	help : Print this help message.
 
 	group : Group packets per below argument, repeats overwrite previous setting.
 		src : (default) Group packets by source address.
@@ -707,7 +708,6 @@ def usage(
 	"""
 	# Core actions
 	print(__doc__)
-	sys.exit()
 
 
 def configureDefaults(
@@ -877,6 +877,7 @@ def actOnCommand(
 	parserState['command'] = None  # Default: consume command
 	if command == "help" :
 		usage()
+		sys.exit()
 	else :
 		...
 
