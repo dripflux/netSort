@@ -85,7 +85,7 @@ IN_FORMAT_CSV_HEADER    = 0o010000
 IN_FORMAT_CSV_NO_HEADER = 0o020000
 IN_FORMAT_FILE_OBJ      = 0o030000
 IN_FORMAT_EXTEND_01     = 0o170000
-IN_FORMAT_DEFAULT       = IN_FORMAT_CSV_HEADER
+IN_FORMAT_DEFAULT       = IN_FORMAT_CSV_NO_HEADER
 # Output Data - Flag Style
 # 11|11 0|000| 000|0 00|00 0|000
 OUT_DATA_MASK        = 0o3600000  # Bits 16-19
@@ -122,6 +122,52 @@ class Subcommand(enum.Enum) :
 	ORDER   = "order"
 	SORT    = "sort"
 	# Aliases
+
+
+class NetSortMode(enum.IntFlag) :
+	"""
+	Enumeration of netSort modes.
+	"""
+	MODE_NONE = 0o0  # Empty (not set) mode
+	# Group By - Value Style
+	# 1|111 : Bits 0-3 (lowest nibble)
+	GROUP_BY_MASK         = 0o17
+	GROUP_BY_SRC_ADDR     = 0o01
+	GROUP_BY_DEST_ADDR    = 0o02
+	GROUP_BY_CONNECT      = 0o03
+	GROUP_BY_CONVERSATION = 0o04
+	GROUP_BY_PROTOCOL     = 0o05
+	GROUP_BY_EXTEND_01    = 0o17
+	GROUP_BY_DEFAULT      = GROUP_BY_SRC_ADDR
+	# Sort - Value Style
+	# 11|11 0|000 : Bits 4-7
+	SORT_MASK      = 0o360
+	SORT_PACKETS   = 0o020
+	SORT_BYTES     = 0o040
+	SORT_EXTEND_01 = 0o360
+	SORT_DEFAULT   = SORT_PACKETS
+	# Order - Value Style
+	# 111|1 00|00 0|000 : Bits 8-11
+	ORDER_MASK      = 0o7400
+	ORDER_NUM_LOW   = 0o0400
+	ORDER_NUM_HIGH  = 0o1000
+	ORDER_SEQUENCE  = 0o1400  # Order by convesation sequence start
+	ORDER_EXTEND_01 = 0o7400
+	ORDER_DEFAULT   = ORDER_NUM_LOW
+	# Input Format - Value Style
+	# 1|111| 000|0 00|00 0|000 : Bits 12-15
+	IN_FORMAT_MASK               = 0o170000
+	IN_FORMAT_SPLT_CSV_HEADER    = 0o010000
+	IN_FORMAT_SPLT_CSV_NO_HEADER = 0o020000
+	IN_FORMAT_FILE_OBJ           = 0o030000
+	IN_FORMAT_EXTEND_01          = 0o170000
+	IN_FORMAT_DEFAULT            = IN_FORMAT_SPLT_CSV_NO_HEADER
+	# Output Data - Flag Style
+	...
+	# Output Format - Value Style
+	...
+	# Aliases
+	...
 
 
 class SPLTcsv(enum.Enum) :
@@ -695,7 +741,8 @@ def main(
 	:rtype: none
 	"""
 	# Set Up Environment
-	configureDefaults()
+	config = {}  # Core configuration
+	configureDefaults(config)
 	cmdArgv = useArgv(argv)
 	# Prepare for processing
 	inputFilenames = processArgv(cmdArgv.copy())
@@ -722,11 +769,16 @@ def usage(
 
 
 def configureDefaults(
+		  config
 	) :
 	"""
 	Assign default configuration to config.
 
-	:param cfgGlobal:
+	:param config: Configuration to apply defaults to.
+	:type config: dict
+
+	:return: None
+	:rtype: none
 	"""
 	cfgGlobal["mode"] = \
 	    GROUP_BY_USE_DEFAULT \
@@ -735,6 +787,7 @@ def configureDefaults(
 	  | IN_FORMAT_USE_DEFAULT \
 	  | OUT_DATA_USE_DEFAULT \
 	  | OUT_FORMAT_USE_DEFAULT
+	...
 
 
 def useArgv(
@@ -990,6 +1043,6 @@ def outputResults(
 		print(outData, file=file)
 
 
-configureDefaults()
+configureDefaults({})  # cfgGlobal
 if __name__ == "__main__" :  # Called as standalone program
 	main()
