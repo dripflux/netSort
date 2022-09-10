@@ -107,7 +107,7 @@ OUT_FORMAT_DEFAULT     = OUT_FORMAT_TSV_HUMAN
 
 
 # Declare Required Variables (Mutables)
-config = {}
+cfgGlobal = {}
 
 
 # Enumerations
@@ -240,7 +240,7 @@ class ProcPacket :
 		self.count = 0
 		self.bytes = 0
 		if packet is not None :
-			modeGroup = config["mode"] & GROUP_BY_MASK
+			modeGroup = cfgGlobal["mode"] & GROUP_BY_MASK
 			if modeGroup == GROUP_BY_USE_DEFAULT :
 				modeGroup = GROUP_BY_DEFAULT
 			if modeGroup == GROUP_BY_SRC_ADDR :
@@ -272,7 +272,7 @@ class ProcPacket :
 		"""
 		Description: Return equality Boolean based on Sort Mode.
 		"""
-		modeSort = config["mode"] & SORT_MASK
+		modeSort = cfgGlobal["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
 		if modeSort == SORT_PACKETS :
@@ -288,7 +288,7 @@ class ProcPacket :
 		"""
 		Description: Return greater than or equality Boolean based on Sort Mode.
 		"""
-		modeSort = config["mode"] & SORT_MASK
+		modeSort = cfgGlobal["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
 		if modeSort == SORT_PACKETS :
@@ -314,7 +314,7 @@ class ProcPacket :
 		"""
 		Description: Return greater than Boolean based on Sort Mode.
 		"""
-		modeSort = config["mode"] & SORT_MASK
+		modeSort = cfgGlobal["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
 		if modeSort == SORT_PACKETS :
@@ -340,7 +340,7 @@ class ProcPacket :
 		"""
 		Description: Return less than or equality Boolean based on Sort Mode.
 		"""
-		modeSort = config["mode"] & SORT_MASK
+		modeSort = cfgGlobal["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
 		if modeSort == SORT_PACKETS :
@@ -366,7 +366,7 @@ class ProcPacket :
 		"""
 		Description: Return less than Boolean based on Sort Mode.
 		"""
-		modeSort = config["mode"] & SORT_MASK
+		modeSort = cfgGlobal["mode"] & SORT_MASK
 		if modeSort == SORT_USE_DEFAULT :
 			modeSort = SORT_DEFAULT
 		if modeSort == SORT_PACKETS :
@@ -463,7 +463,7 @@ class ProcPackets :
 			, mode = None
 		) :
 		"""
-		Description: Lowest level API; process RawPackets based on mode or config["mode"] if None.
+		Description: Lowest level API; process RawPackets based on mode or cfgGlobal["mode"] if None.
 		Arguments:
 			mode : Mode to group, count, and order RawPackets per.
 		Returns:
@@ -471,12 +471,12 @@ class ProcPackets :
 		"""
 		if mode is not None :
 			combinedMasks = GROUP_BY_MASK | SORT_MASK | ORDER_MASK
-			config["mode"] = (combinedMasks & mode) | (config["mode"] & ~combinedMasks)
+			cfgGlobal["mode"] = (combinedMasks & mode) | (cfgGlobal["mode"] & ~combinedMasks)
 		self.__processGroupBy()
 		self.__resultPackets = list(self.__procPackets.values())
 		self.__resultPackets.sort()
 		# Reverse order if needed
-		orderMode = config["mode"] & ORDER_MASK
+		orderMode = cfgGlobal["mode"] & ORDER_MASK
 		if orderMode == ORDER_NUM_HIGH :
 			self.__resultPackets.reverse()
 		return self.__resultPackets.copy()
@@ -513,7 +513,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_BYTES
 		return self.processPerMode(procMode)
 
@@ -532,7 +532,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_CONNECT | SORT_PACKETS
 		return self.processPerMode(procMode)
 
@@ -551,7 +551,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_BYTES
 		return self.processPerMode(procMode)
 
@@ -570,7 +570,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_DEST_ADDR | SORT_PACKETS
 		return self.processPerMode(procMode)
 
@@ -589,7 +589,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_PROTO | SORT_BYTES
 		return self.processPerMode(procMode)
 
@@ -608,7 +608,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_PROTO | SORT_PACKETS
 		return self.processPerMode(procMode)
 
@@ -627,7 +627,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_BYTES
 		return self.processPerMode(procMode)
 
@@ -646,7 +646,7 @@ class ProcPackets :
 		if orderMode is not None :
 			procOrderMode = orderMode & ORDER_MASK
 		else :
-			procOrderMode = config["mode"] & ORDER_MASK
+			procOrderMode = cfgGlobal["mode"] & ORDER_MASK
 		procMode = procOrderMode | GROUP_BY_SRC_ADDR | SORT_PACKETS
 		return self.processPerMode(procMode)
 
@@ -724,9 +724,11 @@ def usage(
 def configureDefaults(
 	) :
 	"""
-	Description: Assign default configuration to config.
+	Assign default configuration to config.
+
+	:param cfgGlobal:
 	"""
-	config["mode"] = \
+	cfgGlobal["mode"] = \
 	    GROUP_BY_USE_DEFAULT \
 	  | SORT_USE_DEFAULT \
 	  | ORDER_USE_DEFAULT \
@@ -765,10 +767,6 @@ def processArgv(
 	# Set up working set
 	parserState = {}
 	parserState['command'] = None
-	# Handle help option
-	# if "help" in argv :
-	# 	print(__doc__)
-	# 	sys.exit()
 	filenames = []
 	skipIt = False
 	for token in argv[1:] :
@@ -782,7 +780,7 @@ def processArgv(
 			processCommand(parserState, None, token)
 		if token == "group" :  # Argument: Subcommand: group
 			if i < len(argv) - 1 :
-				saveCurrMode = config["mode"] & ~ GROUP_BY_MASK
+				saveCurrMode = cfgGlobal["mode"] & ~ GROUP_BY_MASK
 				groupByStr = argv[i+1]
 				if groupByStr == "src" :
 					newGroupMode = GROUP_BY_SRC_ADDR
@@ -794,13 +792,13 @@ def processArgv(
 					newGroupMode = GROUP_BY_PROTO
 				else :
 					sys.exit("(netSort) ERROR: Improper 'group' Usage, see 'help'.")
-				config["mode"] = saveCurrMode | newGroupMode
+				cfgGlobal["mode"] = saveCurrMode | newGroupMode
 			else :
 				sys.exit("(netSort) ERROR: Improper 'group' Usage, see 'help'.")
 			skipIt = True
 		elif token == "sort" :  # Argument: Subcommand: sort
 			if i < len(argv) - 1 :
-				saveCurrMode = config["mode"] & ~ SORT_MASK
+				saveCurrMode = cfgGlobal["mode"] & ~ SORT_MASK
 				sortStr = argv[i+1]
 				if sortStr == "packets" :
 					newSortMode = SORT_PACKETS
@@ -808,13 +806,13 @@ def processArgv(
 					newSortMode = SORT_BYTES
 				else :
 					sys.exit("(netSort) ERROR: Improper 'sort' Usage, see 'help'.")
-				config["mode"] = saveCurrMode | newSortMode
+				cfgGlobal["mode"] = saveCurrMode | newSortMode
 			else :
 				sys.exit("(netSort) ERROR: Improper 'sort' Usage, see 'help'.")
 			skipIt = True
 		elif token == "order" :  # Argument: Sub-command: order
 			if i < len(argv) - 1 :
-				saveCurrMode = config["mode"] & ~ ORDER_MASK
+				saveCurrMode = cfgGlobal["mode"] & ~ ORDER_MASK
 				orderStr = argv[i+1]
 				if orderStr == "low" :
 					newOrderMode = ORDER_NUM_LOW
@@ -822,7 +820,7 @@ def processArgv(
 					newOrderMode = ORDER_NUM_HIGH
 				else :
 					sys.exit("(netOrder) ERROR: Improper 'order' Usage, see 'help'.")
-				config["mode"] = saveCurrMode | newOrderMode
+				cfgGlobal["mode"] = saveCurrMode | newOrderMode
 			else :
 				sys.exit("(netOrder) ERROR: Improper 'order' Usage, see 'help'.")
 			skipIt = True
@@ -912,6 +910,29 @@ def processCommand(
 			actOnCommand(parserState, command)
 
 
+def processArgument(
+		  parserState
+		, argument
+		, config
+	) :
+	"""
+	Process argument based on parserState and config.
+
+	:param parserState: Current state of parser.
+	:type parserState: dict
+
+	:param argument: Argument being processed.
+	:type argument: str
+
+	:param config: Program configuration settings.
+	:type config: dict
+	"""
+	# Set up working set
+	...
+	# Core actions
+	...
+
+
 def actOnCommand(
 		parserState
 		, command
@@ -947,8 +968,8 @@ def outputResults(
 		outDataMode = mode & OUT_DATA_MASK
 		sortMode = mode & SORT_MASK
 	else :
-		outDataMode = config["mode"] & OUT_DATA_MASK
-		sortMode = config["mode"] & SORT_MASK
+		outDataMode = cfgGlobal["mode"] & OUT_DATA_MASK
+		sortMode = cfgGlobal["mode"] & SORT_MASK
 	if outDataMode == OUT_DATA_USE_DEFAULT :
 		outDataMode = OUT_DATA_DEFAULT
 	if outDataMode == OUT_DATA_TRACK_SORT :
