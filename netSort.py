@@ -188,52 +188,52 @@ class SPLTcsv(enum.Enum) :
 	Enumeration of Sequence of Packet Length and Timing CSV field indexes, 0 basis indexing.
 	"""
 
-	frame    = 0  # Frame number of packet
-	relTime  = 1  # Arrival time of packet, relative to start of capture file
-	srcAddr  = 2  # Source address of packet, highest layer address between Data Link and Network layers
-	destAddr = 3  # Destination address of packet, highest layer address between Data Link and Network layers
-	srcPort  = 4  # Source port of packet, Transport layer
-	destPort = 5  # Destination port of packet, Transport layer
-	protocol = 6  # Protocol of packet, highest layer protocol between Data Link and Application layers
-	length   = 7  # Length of packet in bytes, excludes Data Link layer frame synchronization header and footer bytes
-	info     = 8  # Summary information of packet
+	frame      = 0  # Frame number of packet
+	arriveTime = 1  # Arrival time of packet, relative to start of capture file or absolute
+	srcAddr    = 2  # Source address of packet, highest layer address between Data Link and Network layers
+	destAddr   = 3  # Destination address of packet, highest layer address between Data Link and Network layers
+	srcPort    = 4  # Source port of packet, Transport layer
+	destPort   = 5  # Destination port of packet, Transport layer
+	protocol   = 6  # Protocol of packet, highest layer protocol between Data Link and Application layers
+	length     = 7  # Length of packet in bytes, excludes Data Link layer frame synchronization header and footer bytes
+	info       = 8  # Summary information of packet
 
 
 # Class Definitions
 
 class RawPacket :
 	"""
-	Description: Model a single raw packet.
+	Model a single raw packet.
 	"""
 
 
 	def __init__(
-			self
+			  self
 		) :
 		"""
-		Description: Initialize an empty raw packet.
+		Initialize an empty raw packet.
 		"""
-		self.ID       = None
-		self.relTime  = 0
-		self.srcAddr  = None
-		self.destAddr = None
-		self.srcPort  = None
-		self.destPort = None
-		self.proto    = None
-		self.bytes    = 0
+		self.ID         = None
+		self.arriveTime = 0
+		self.srcAddr    = None
+		self.destAddr   = None
+		self.srcPort    = None
+		self.destPort   = None
+		self.proto      = None
+		self.bytes      = 0
 
 
 	def __str__(
-			self
+			  self
 		) :
 		"""
-		Description: CSV representation of RawPacket.
+		Generate and return string representation.
 		"""
-		return self.toCSV()
+		return self.to_csv()
 
 
-	def fromCSV(
-			self
+	def from_csv(
+			  self
 			, lineCSV
 		) :
 		"""
@@ -245,18 +245,18 @@ class RawPacket :
 			fields = lineCSV.split(",")
 		except :
 			raise
-		self.ID       = fields[SPLTcsv.frame.value].strip('"')
-		self.relTime  = float( fields[SPLTcsv.relTime.value].strip('"') )
-		self.srcAddr  = fields[SPLTcsv.srcAddr.value].strip('"')
-		self.destAddr = fields[SPLTcsv.destAddr.value].strip('"')
-		self.srcPort  = fields[SPLTcsv.srcPort.value].strip('"')
-		self.destPort = fields[SPLTcsv.destPort.value].strip('"')
-		self.proto    = fields[SPLTcsv.protocol.value].strip('"')
-		self.bytes    = int( fields[SPLTcsv.length.value].strip('"') )
-		self.info     = fields[SPLTcsv.info.value].strip('"')
+		self.ID         = fields[SPLTcsv.frame.value].strip('"')
+		self.arriveTime = float( fields[SPLTcsv.arriveTime.value].strip('"') )
+		self.srcAddr    = fields[SPLTcsv.srcAddr.value].strip('"')
+		self.destAddr   = fields[SPLTcsv.destAddr.value].strip('"')
+		self.srcPort    = fields[SPLTcsv.srcPort.value].strip('"')
+		self.destPort   = fields[SPLTcsv.destPort.value].strip('"')
+		self.proto      = fields[SPLTcsv.protocol.value].strip('"')
+		self.bytes      = int( fields[SPLTcsv.length.value].strip('"') )
+		self.info       = fields[SPLTcsv.info.value].strip('"')
 
 
-	def toCSV(
+	def to_csv(
 			self
 		) :
 		"""
@@ -272,10 +272,10 @@ class RawPacket :
 			7 : Packet size in bytes
 			8 : Information
 		"""
-		packetCSV = str(self.ID) + "," + str(self.relTime) \
+		packetCSV = str(self.ID) + "," + str(self.arriveTime) \
 		            + "," + str(self.srcAddr) + "," + str(self.destAddr) \
 		            + "," + str(self.srcPort) + "," + str(self.destPort) \
-		            + "," + str(self.proto) + "," + str(self.bytes) \
+		            + "," + str(self.proto)   + "," + str(self.bytes) \
 		            + "," + str(self.info)
 		return packetCSV
 
@@ -287,7 +287,7 @@ class ProcPacket :
 
 
 	def __init__(
-			self
+			  self
 			, packet
 		) :
 		"""
@@ -315,7 +315,7 @@ class ProcPacket :
 
 
 	def __iadd__(
-			self
+			  self
 			, other
 		) :
 		if self.group == other.group :
@@ -325,7 +325,7 @@ class ProcPacket :
 
 
 	def __eq__(
-			self
+			  self
 			, other
 		) :
 		"""
@@ -341,7 +341,7 @@ class ProcPacket :
 
 
 	def __ge__(
-			self
+			  self
 			, other
 		) :
 		"""
@@ -367,7 +367,7 @@ class ProcPacket :
 
 
 	def __gt__(
-			self
+			  self
 			, other
 		) :
 		"""
@@ -393,7 +393,7 @@ class ProcPacket :
 
 
 	def __le__(
-			self
+			  self
 			, other
 		) :
 		"""
@@ -419,7 +419,7 @@ class ProcPacket :
 
 
 	def __lt__(
-			self
+			  self
 			, other
 		) :
 		"""
@@ -445,7 +445,7 @@ class ProcPacket :
 
 
 	def __str__(
-			self
+			  self
 		) :
 		"""
 		Description: CSV representation of ProcPacket.
@@ -461,8 +461,8 @@ class ProcPackets :
 
 
 	def __init__(
-			self
-			, file = None
+			  self
+			, file   = None
 			, format = IN_FORMAT_USE_DEFAULT
 		) :
 		"""
@@ -480,7 +480,7 @@ class ProcPackets :
 
 
 	def appendPackets(
-			self
+			  self
 			, file
 			, format = IN_FORMAT_USE_DEFAULT
 		) :
@@ -513,12 +513,12 @@ class ProcPackets :
 				continue
 			pureCSV = packetLine.strip()
 			newPacket = RawPacket()
-			newPacket.fromCSV(pureCSV)
+			newPacket.from_csv(pureCSV)
 			self.__rawPackets.append(newPacket)
 
 
 	def processPerMode(
-			self
+			  self
 			, mode = None
 		) :
 		"""
@@ -542,7 +542,7 @@ class ProcPackets :
 
 
 	def __processGroupBy(
-			self
+			  self
 		) :
 		"""
 		Description: Process RawPackets based on group mode.
@@ -559,7 +559,7 @@ class ProcPackets :
 
 
 	def connectionByBytes(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -578,7 +578,7 @@ class ProcPackets :
 
 
 	def connectionByPackets(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -597,7 +597,7 @@ class ProcPackets :
 
 
 	def destinationByBytes(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -616,7 +616,7 @@ class ProcPackets :
 
 
 	def destinationByPackets(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -635,7 +635,7 @@ class ProcPackets :
 
 
 	def protocolByBytes(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -654,7 +654,7 @@ class ProcPackets :
 
 
 	def protocolByPackets(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -673,7 +673,7 @@ class ProcPackets :
 
 
 	def sourceByBytes(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -692,7 +692,7 @@ class ProcPackets :
 
 
 	def sourceByPackets(
-			self
+			  self
 			, orderMode = None
 		) :
 		"""
@@ -711,7 +711,7 @@ class ProcPackets :
 
 
 	def clear(
-			self
+			  self
 		) :
 		"""
 		Description: Clear source packets and results from previous processing; retains configuration mode.
@@ -721,7 +721,7 @@ class ProcPackets :
 
 
 	def clearResults(
-			self
+			  self
 		) :
 		"""
 		Description: Clear results from previous processing.
@@ -731,7 +731,7 @@ class ProcPackets :
 
 
 	def recallResults(
-			self
+			  self
 		) :
 		"""
 		Description: Recall results from last processing.
@@ -742,7 +742,7 @@ class ProcPackets :
 
 
 def main(
-		argv = None
+		  argv = None
 	) :
 	"""
 	Main program control flow.
@@ -804,7 +804,7 @@ def configureDefaults(
 
 
 def useArgv(
-		argv
+		  argv
 	) :
 	"""
 	Derive and return argv to use (passed in argv or sys.argv) based on argv.
@@ -821,7 +821,7 @@ def useArgv(
 
 
 def processArgv(
-		argv
+		  argv
 	) :
 	"""
 	Description:
@@ -896,7 +896,7 @@ def processArgv(
 
 
 def knownSubcommand(
-		term
+		  term
 	) :
 	"""
 	Determine if term is a known subcommand or not.
@@ -916,7 +916,7 @@ def knownSubcommand(
 
 
 def deriveSubcommand(
-		hint
+		  hint
 	) :
 	"""
 	Derive subcommand from hint.
@@ -946,7 +946,7 @@ def deriveSubcommand(
 
 
 def processCommand(
-		parserState
+		  parserState
 		, command
 		, argument = None
 	) :
@@ -1000,7 +1000,7 @@ def processArgument(
 
 
 def actOnCommand(
-		parserState
+		  parserState
 		, command
 		, argument = None
 	) :
@@ -1023,7 +1023,7 @@ def actOnCommand(
 
 
 def outputResults(
-		results
+		  results
 		, file = sys.stdout
 		, mode = None
 	) :
